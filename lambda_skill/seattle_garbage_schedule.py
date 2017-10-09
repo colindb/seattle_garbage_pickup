@@ -10,21 +10,24 @@ logger.setLevel(logging.INFO)
 
 def get_welcome_response():
     card_title = "Seattle Garbage Pickup Schedule"
-    speech_output = 'This is the Seattle Garbage Pickup Schedule. Try asking: when is my next garbage pickup.' \
-                    'You can also specify an address by asking: when is the next garbage pickup for [your address].'
+    card_output = 'Try asking: when is my next garbage pickup.'
+    speech_output = 'This is the Seattle Garbage Pickup Schedule. Try asking: when is my next garbage pickup.'
     skill_response = skill_core.build_speechlet_response(title = card_title,
+                                                         card_output = card_output,
                                                          output = speech_output,
                                                          reprompt_text = None,
-                                                         should_end_session = True)
+                                                         should_end_session = False)
     return skill_core.build_response(session_attributes = {}, speechlet_response = skill_response)
 
 
 def get_no_default_address_response():
     card_title = "Can't Access Your Address"
-    speech_output = 'This skill does not have access to your address. You need to either allow ' \
+    card_output = 'You need to allow this skill to access your address using your Alexa app.'
+    speech_output = 'This skill does not have access to your address. You need to allow ' \
                     'access using your Alexa app or specify an address by asking: ' \
                     'when is the next pickup for [your address].'
     skill_response = skill_core.build_speechlet_response(title = card_title,
+                                                         card_output = card_output,
                                                          output = speech_output,
                                                          reprompt_text = None,
                                                          should_end_session = True)
@@ -32,11 +35,13 @@ def get_no_default_address_response():
 
 
 def get_invalid_address_response():
-    card_title = "Invalid Device Address"
-    speech_output = 'This device does not have a valid Seattle address. You need to either update ' \
+    card_title = "Invalid Address"
+    card_output = 'Your device does not have a valid Seattle address. Please update your address using your Alexa app.'
+    speech_output = 'Your device does not have a valid Seattle address. You need to either update ' \
                     'your address using your Alexa app or specify an address by asking: ' \
                     'when is the next pickup for [your address].'
     skill_response = skill_core.build_speechlet_response(title = card_title,
+                                                         card_output = card_output,
                                                          output = speech_output,
                                                          reprompt_text = None,
                                                          should_end_session = True)
@@ -45,8 +50,10 @@ def get_invalid_address_response():
 
 def get_session_end_response():
     card_title = "Session Ended"
+    card_output = "Thank you for using Seattle Garbage Pickup"
     speech_output = "Thank you for using Seattle Garbage Pickup"
     speechlet_response = skill_core.build_speechlet_response(title = card_title,
+                                                             card_output = card_output,
                                                              output = speech_output,
                                                              reprompt_text = None,
                                                              should_end_session = True)
@@ -64,10 +71,12 @@ def get_schedule_response(street_address, pickup_start_date = None):
         upcoming_pickups = pickup_api.get_seattle_garbage_pickup_schedule(street_address, start_time)
     except Exception as exc:
         logger.error("Unable to get schedule for address %s and time %s: %s" % (street_address, start_time, exc))
-        card_title = "Error Getting Pickup Schedule"
+        card_title = "Can't Find Your Address"
+        card_output = "Unable to find a pickup schedule for %s. Schedules are only available for house addresses, not apartments or businesses." % street_address
         address_str = '<say-as interpret-as="address">%s</say-as>' % street_address
-        speech_output = "Unable to find a pickup schedule for %s. Pickup schedules are only available for house addresses, not apartments or businesses." % address_str
+        speech_output = "Unable to find a pickup schedule for %s. Schedules are only available for house addresses, not apartments or businesses." % address_str
         speechlet_response = skill_core.build_speechlet_response(title = card_title,
+                                                                 card_output = card_output,
                                                                  output = speech_output,
                                                                  reprompt_text = None,
                                                                  should_end_session = True)
@@ -89,6 +98,7 @@ def get_schedule_response(street_address, pickup_start_date = None):
 
     if not next_pickup:
         card_title = "Unable To Find Pickup"
+        card_output = "Sorry, unable to find the next scheduled pickup for your address."
         speech_output = "Sorry, unable to find the next scheduled pickup for your address."
     else:
         card_title = "Next Scheduled Pickup"
@@ -102,9 +112,11 @@ def get_schedule_response(street_address, pickup_start_date = None):
         else:
             pickup_list_str = "garbage and recycling"
         address_str = '<say-as interpret-as="address">%s</say-as>' % street_address
+        card_output = "The next pickup for %s is %s, for %s." % (street_address, date_pickup_str, pickup_list_str)
         speech_output = "The next pickup for %s is %s, for %s." % (address_str, date_pickup_str, pickup_list_str)
 
     speechlet_response = skill_core.build_speechlet_response(title = card_title,
+                                                             card_output = card_output,
                                                              output = speech_output,
                                                              reprompt_text = None,
                                                              should_end_session = True)

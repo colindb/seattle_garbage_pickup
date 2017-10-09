@@ -10,7 +10,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def build_speechlet_response(title, output, reprompt_text, should_end_session):
+def build_speechlet_response(title, card_output, output, reprompt_text, should_end_session):
     logger.info("Response (%s): %s" % (title, output))
     return {
         'outputSpeech': {
@@ -20,7 +20,7 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
         'card': {
             'type': 'Simple',
             'title': title,
-            'content': output
+            'content': card_output
         },
         'reprompt': {
             'outputSpeech': {
