@@ -46,9 +46,12 @@ def on_intent(intent_request, session, context):
 
             street_address = location['addressLine1']
             logger.info("Using device's default location: %s" % street_address)
+
+        pickup_start_date = None
+        if 'date' in slots and 'value' in slots['date']:
+            pickup_start_date = slots['date']['value']
             
-            
-        return seattle_garbage_schedule.get_schedule_response(street_address)
+        return seattle_garbage_schedule.get_schedule_response(street_address, pickup_start_date)
     elif intent_name == "AMAZON.HelpIntent":
         return seattle_garbage_schedule.get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":

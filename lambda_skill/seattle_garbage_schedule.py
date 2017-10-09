@@ -53,26 +53,36 @@ def get_session_end_response():
     return skill_core.build_response({}, speechlet_response)
 
 
-def get_schedule_response(street_address):
+def get_schedule_response(street_address, pickup_start_date = None):
+    start_time = 0
+    if pickup_start_date:
+        # Convert date to unix timestamp
+        a_date = datetime.datetime.strptime(pickup_start_date, "%Y-%m-%d")
+        start_time = int(a_date.timestamp())
+
     try:
-        upcoming_pickups = pickup_api.get_seattle_garbage_pickup_schedule(street_address)
+        upcoming_pickups = pickup_api.get_seattle_garbage_pickup_schedule(street_address, start_time)
     except Exception as exc:
-        logger.error("Unable to get schedule for address %s: %s" % (street_address, exc))
+        logger.error("Unable to get schedule for address %s and time %s: %s" % (street_address, start_time, exc))
         card_title = "Error Getting Pickup Schedule"
         address_str = '<say-as interpret-as="address">%s</say-as>' % street_address
-        speech_output = "Unable to find a pickup schedule for %s. Are you sure this address is correct?" % address_str
+        speech_output = "Unable to find a pickup schedule for %s. Pickup schedules are only available for house addresses, not apartments or businesses." % address_str
         speechlet_response = skill_core.build_speechlet_response(title = card_title,
                                                                  output = speech_output,
                                                                  reprompt_text = None,
                                                                  should_end_session = True)
         return skill_core.build_response({}, speechlet_response)
 
-    today = datetime.date.today()
+    if pickup_start_date:
+        start_looking_from = datetime.datetime.strptime(pickup_start_date, "%Y-%m-%d").date()
+    else:
+        start_looking_from = datetime.date.today()
+
     next_pickup = None
     for a_pickup in upcoming_pickups:
         logger.info("Looking at upcoming pickup: %s" % a_pickup)
         a_pickup_date = datetime.datetime.strptime(a_pickup['date'], "%Y-%m-%d").date()
-        if a_pickup_date > today:
+        if a_pickup_date > start_looking_from:
             logger.info("Found the next pickup")
             next_pickup = a_pickup
             break

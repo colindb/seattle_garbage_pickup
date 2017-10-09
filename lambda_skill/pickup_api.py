@@ -37,7 +37,7 @@ def format_raw_pickup_data(raw_pickup):
 def get_seattle_garbage_pickup_schedule(street_address, start_time = 0):
     # Note: using start_time = 0 defaults the API to the current month.
     # Passing in an epoch value overrides start_time with that value (for QA).
-    logger.info("Fetching Seattle address for street_address: %s" % street_address)
+    logger.info("Fetching Seattle address for street_address: %s and start_time %s" % (street_address, start_time))
     address_base = "http://www.seattle.gov/UTIL/WARP/Home/GetAddress"
     address_params = {'pAddress': street_address,
                       'pActiveOnly': 'spu',
