@@ -25,11 +25,11 @@ def on_intent(intent_request, session, context):
     """
     logger.info("on_intent requestId=" + intent_request['requestId'] + ", sessionId=" + session['sessionId'])
     intent = intent_request['intent']
-    slots = intent_request['intent']['slots']
     intent_name = intent_request['intent']['name']
 
     if intent_name == "GetGarbageSchedule":
         # First see if user specified an address
+        slots = intent_request['intent'].get('slots', {})
         if 'address' in slots and 'value' in slots['address']:
             street_address = slots['address']['value']
         else:
